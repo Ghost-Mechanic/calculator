@@ -1,0 +1,86 @@
+* {
+    cursor: default;
+}
+
+body {
+    display: flex;
+    min-height: 95vh;
+    justify-content: center;
+    align-items: center;
+}
+
+#container {
+    border: solid black 1px;
+    width: 480px;
+    height: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+#display {
+    border: solid black 1px;
+    margin-top: 12px;
+    width: 446px;
+    height: 116px;
+    font-size: 108px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+}
+
+#clear {
+    border: solid black 1px;
+    width: 104px;
+    height: 90px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#sign {
+    border: solid black 1px;
+    width: 104px;
+    height: 90px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.operator {
+    border: solid black 1px;
+    width: 104px;
+    height: 90px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.digit {
+    border: solid black 1px;
+    width: 104px;
+    height: 90px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#zero {
+    border: solid black 1px;
+    width: 332px;
+    height: 90px;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
