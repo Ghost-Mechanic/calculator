@@ -58,6 +58,16 @@ function resetCalculator() {
     haveRight = false;
 }
 
+// this function resets all variables except for leftNum and the display element, 
+// to be called after a calculation to keep the calculation's value in leftNum
+function resetAfterCalculation() {
+    leftNum = displayNum;
+    rightNum = "invalid";
+    display.textContent = String(displayNum).substring(0, 8);
+    displayNum = 0;
+    haveRight = false;
+}
+
 // declare three variables for three parts of math equation
 // initialize leftNum and rightNum to invalid to keep track of which numbers have been obtained
 let leftNum = "invalid";
@@ -134,12 +144,6 @@ let clear = document.querySelector("#clear");
 
 clear.addEventListener("click", () => {
     display.textContent = "0";
-    // displayNum = 0;
-    // operator = "invalid";
-    // leftNum = "invalid";
-    // rightNum = "invalid";
-    // haveLeft = false;
-    // haveRight = false;
     resetCalculator();
 });
 
@@ -163,16 +167,53 @@ for (let i = 0; i < operators.length; ++i) {
             return;
         }
 
+        // perform percentage operation by dividing currrent number by 100, use two
+        // if statements to check if current number is the left or right number
+        if (operators[i].textContent == "%" && haveLeft && haveRight) {
+            rightNum /= 100;
+            display.textContent = String(rightNum).substring(0, 8);
+            displayNum = 0;
+            haveLeft = true;
+        }
+        else if (operators[i].textContent == "%" && !haveRight) {
+            leftNum /= 100;
+            display.textContent = String(leftNum).substring(0, 8);
+            displayNum = 0;
+            haveLeft = true;
+        }
+
         // capture operator in variable if it is not the equals sign
         if (operators[i].textContent != "=") {
+            // perform calculation if the calculator has both left and right numbers
+            if (haveLeft && haveRight) {
+                displayNum = calculate(leftNum, operator, rightNum);
+                resetAfterCalculation();
+            }
             operator = operators[i].textContent;
         }
         // perform calculation if operator selected is the equals sign
         else {
             if (haveLeft && haveRight) {
                 displayNum = calculate(leftNum, operator, rightNum);
-                display.textContent = String(displayNum);
+                resetAfterCalculation();
             }
         }
+
+        console.log(leftNum);
+        console.log(rightNum);
     });
 }
+
+// add event listener to sign button to swap signs of current number when clicked
+let sign = document.querySelector("#sign");
+
+sign.addEventListener("click", () => {
+    displayNum *= -1;
+
+    // change rightNum's value if the calculator already has the left number
+    if (haveLeft) {
+        rightNum = displayNum;
+    }
+    
+    display.textContent = String(displayNum).substring(0, 8);
+})
