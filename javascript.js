@@ -180,9 +180,6 @@ function handleOperator(selectedOperator) {
             resetAfterCalculation();
         }
     }
-
-    console.log(leftNum);
-    console.log(rightNum);
 }
 
 // this function usess the indexOf() string method to check the string num 
