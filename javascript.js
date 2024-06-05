@@ -65,6 +65,7 @@ function resetAfterCalculation() {
     rightNum = "invalid";
     display.textContent = String(displayNum).substring(0, 8);
     displayNum = 0;
+    haveLeft = false;
     haveRight = false;
 }
 
@@ -73,8 +74,20 @@ function resetAfterCalculation() {
 function buildNumber(digit) {
     if (display.textContent.length < 8) {
         // store new display number in variable displayNum
-        displayNum = Number(String(displayNum) + digit);
-        displayNum = Number(removeLeadingZeroes(String(displayNum)));
+        
+        // handle case where user inputted a decimal
+        if (hasDecimal(display.textContent) && !haveLeft) {
+            displayNum = Number(String(display.textContent) + digit);
+            displayNum = Number(removeLeadingZeroes(String(displayNum)));
+        }
+        else if (hasDecimal(display.textContent) && haveLeft && haveRight) {
+            displayNum = Number(String(display.textContent) + digit);
+            displayNum = Number(removeLeadingZeroes(String(displayNum)));
+        }
+        else {
+            displayNum = Number(String(displayNum) + digit);
+            displayNum = Number(removeLeadingZeroes(String(displayNum)));
+        }
 
         // if the calculator has the left operand, set rightNum to displayNum
         if (haveLeft) {
@@ -121,10 +134,10 @@ function addZero() {
 // this function handles the user selecting operators, it can either build the
 // equation with it or perform the calculation depending on the operator selected
 function handleOperator(selectedOperator) {
-    // only assign number to leftNum if it has no number in it,
-    // which means "invalid" is stored in the variable
-    if (leftNum == "invalid") {
-        leftNum = displayNum;
+    // only assign number to leftNum if it has no number in it
+    // or a calculation has just been performed
+    if (!haveLeft) {
+        leftNum = Number(display.textContent);
         displayNum = 0;
         haveLeft = true;
     }
@@ -167,6 +180,42 @@ function handleOperator(selectedOperator) {
             resetAfterCalculation();
         }
     }
+
+    console.log(leftNum);
+    console.log(rightNum);
+}
+
+// this function usess the indexOf() string method to check the string num 
+// contains a decimal point
+function hasDecimal(num) {
+    if (num.indexOf(".") != -1) {
+        return true;
+    }
+    
+    return false;
+}
+
+// this function adds a decimal point to the number on display
+function addDecimal() {
+    if (!hasDecimal(display.textContent)) {
+        display.textContent += ".";
+    }
+}
+
+// this function deletes the last inputted number the user made
+function backspace() {
+    displayNum = Number(String(displayNum).substring(0, String(displayNum).length - 1));
+    
+    // change rightNum if the calculator already has leftNum, set leftNum to 0 if backspace
+    // is hit in the middle of performing operation 
+    if (haveLeft && haveRight) {
+        rightNum = displayNum;
+    }
+    else if (haveLeft && !haveRight) {
+        leftNum = displayNum;
+    }
+
+    display.textContent = String(displayNum).substring(0, 8);
 }
 
 // declare three variables for three parts of math equation
@@ -240,6 +289,20 @@ sign.addEventListener("click", () => {
     }
 });
 
+// add event listener to allow the user to input a decimal into the calculator
+let decimal = document.querySelector("#decimal");
+
+decimal.addEventListener("click", () => {
+    addDecimal();
+});
+
+// add event listener for a backspace button to allow the user to delete their inputs
+let back = document.querySelector("#back");
+
+back.addEventListener("click", () => {
+    backspace();
+});
+
 // add keyboard support for calculator
 document.addEventListener("keydown", function(e) {
     if (e.key >= "1" && e.key <= "9") {
@@ -262,5 +325,11 @@ document.addEventListener("keydown", function(e) {
     // allow user to multiply with asterisk, pass in multiplication symbol when they do
     else if (e.key == "*") {
         handleOperator("\u00D7")
+    }
+    else if (e.key == ".") {
+        addDecimal();
+    }
+    else if (e.key == "Backspace") {
+        backspace();
     }
 });
