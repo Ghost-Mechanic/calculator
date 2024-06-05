@@ -68,6 +68,107 @@ function resetAfterCalculation() {
     haveRight = false;
 }
 
+// this function builds the number to be operated on and adds it to the display,
+// the number can be built by clicking on the buttons or with the keyboard
+function buildNumber(digit) {
+    if (display.textContent.length < 8) {
+        // store new display number in variable displayNum
+        displayNum = Number(String(displayNum) + digit);
+        displayNum = Number(removeLeadingZeroes(String(displayNum)));
+
+        // if the calculator has the left operand, set rightNum to displayNum
+        if (haveLeft) {
+            rightNum = displayNum;
+            haveRight = true;
+        }
+
+        // set text content of display element to displayNum
+        display.textContent = String(displayNum);
+    }
+    // store new number in displayNum even if it doesn't fit on the display
+    else {
+        displayNum = Number(String(displayNum) + digit);
+        if (haveLeft) {
+            rightNum = displayNum;
+            haveRight = true;
+        } 
+    }
+}
+
+// this function adds the number zero to the number on display
+function addZero() {
+    if (display.textContent.length < 8) {
+        displayNum = Number(String(displayNum) + zero.textContent);
+
+        if (haveLeft) {
+            rightNum = displayNum;
+            haveRight = true;
+        }
+
+        // store new display number in variable displayNum
+        display.textContent = Number(displayNum); 
+    }
+    // store new number in displayNum even if it doesn't fit on the display
+    else {
+        displayNum = Number(String(displayNum) + zero.textContent);
+        if (haveLeft) {
+            rightNum = displayNum;
+            haveRight = true;
+        } 
+    }
+}
+
+// this function handles the user selecting operators, it can either build the
+// equation with it or perform the calculation depending on the operator selected
+function handleOperator(selectedOperator) {
+    // only assign number to leftNum if it has no number in it,
+    // which means "invalid" is stored in the variable
+    if (leftNum == "invalid") {
+        leftNum = displayNum;
+        displayNum = 0;
+        haveLeft = true;
+    }
+
+    // if the user tries to divide by 0, display "No" and reset calculator
+    if (haveRight && rightNum == 0 && operator == "/") {
+        display.textContent = "No";
+        resetCalculator();
+        return;
+    }
+
+    // perform percentage operation by dividing currrent number by 100, use two
+    // if statements to check if current number is the left or right number
+    if (selectedOperator == "%" && haveLeft && haveRight) {
+        rightNum /= 100;
+        display.textContent = String(rightNum).substring(0, 8);
+        displayNum = 0;
+        haveLeft = true;
+    }
+    else if (selectedOperator == "%" && !haveRight) {
+        leftNum /= 100;
+        display.textContent = String(leftNum).substring(0, 8);
+        displayNum = 0;
+        haveLeft = true;
+    }
+
+    // capture operator in variable if it is not the equals sign
+    if (selectedOperator != "=") {
+        // perform calculation if the calculator has both left and right numbers
+        if (haveLeft && haveRight) {
+            displayNum = calculate(leftNum, operator, rightNum);
+            resetAfterCalculation();
+        }
+        operator = selectedOperator;
+    }
+    // perform calculation if operator selected is the equals sign
+    else {
+        if (haveLeft && haveRight) {
+            displayNum = calculate(leftNum, operator, rightNum);
+            resetAfterCalculation();
+        }
+    }
+}
+
 // declare three variables for three parts of math equation
 // initialize leftNum and rightNum to invalid to keep track of which numbers have been obtained
 let leftNum = "invalid";
@@ -89,28 +190,7 @@ let digits = document.getElementsByClassName("digit");
 // use for loop to add click event to each digit, adding digit to display when clicked
 for (let i = 0; i < digits.length; ++i) {
     digits[i].addEventListener("click", () => {
-        if (display.textContent.length < 8) {
-            // store new display number in variable displayNum
-            displayNum = Number(String(displayNum) + digits[i].textContent);
-            displayNum = Number(removeLeadingZeroes(String(displayNum)));
-
-            // if the calculator has the left operand, set rightNum to displayNum
-            if (haveLeft) {
-                rightNum = displayNum;
-                haveRight = true;
-            }
-
-            // set text content of display element to displayNum
-            display.textContent = String(displayNum);
-        }
-        // store new number in displayNum even if it doesn't fit on the display
-        else {
-            displayNum = Number(String(displayNum) + digits[i].textContent);
-            if (haveLeft) {
-                rightNum = displayNum;
-                haveRight = true;
-            } 
-        }
+        buildNumber(digits[i].textContent)
     });
 }
 
@@ -118,25 +198,7 @@ for (let i = 0; i < digits.length; ++i) {
 let zero = document.querySelector("#zero");
 
 zero.addEventListener("click", () => {
-    if (display.textContent.length < 8) {
-        displayNum = Number(String(displayNum) + zero.textContent);
-
-        if (haveLeft) {
-            rightNum = displayNum;
-            haveRight = true;
-        }
-
-        // store new display number in variable displayNum
-        display.textContent = Number(displayNum); 
-    }
-    // store new number in displayNum even if it doesn't fit on the display
-    else {
-        displayNum = Number(String(displayNum) + zero.textContent);
-        if (haveLeft) {
-            rightNum = displayNum;
-            haveRight = true;
-        } 
-    }
+    addZero();
 });
 
 // add event listener to clear button which clears display and resets calculator
@@ -152,55 +214,7 @@ let operators = document.getElementsByClassName("operator");
 
 for (let i = 0; i < operators.length; ++i) {
     operators[i].addEventListener("click", () => {
-        // only assign number to leftNum if it has no number in it,
-        // which means "invalid" is stored in the variable
-        if (leftNum == "invalid") {
-            leftNum = displayNum;
-            displayNum = 0;
-            haveLeft = true;
-        }
-
-        // if the user tries to divide by 0, display "No" and reset calculator
-        if (haveRight && rightNum == 0 && operator == "/") {
-            display.textContent = "No";
-            resetCalculator();
-            return;
-        }
-
-        // perform percentage operation by dividing currrent number by 100, use two
-        // if statements to check if current number is the left or right number
-        if (operators[i].textContent == "%" && haveLeft && haveRight) {
-            rightNum /= 100;
-            display.textContent = String(rightNum).substring(0, 8);
-            displayNum = 0;
-            haveLeft = true;
-        }
-        else if (operators[i].textContent == "%" && !haveRight) {
-            leftNum /= 100;
-            display.textContent = String(leftNum).substring(0, 8);
-            displayNum = 0;
-            haveLeft = true;
-        }
-
-        // capture operator in variable if it is not the equals sign
-        if (operators[i].textContent != "=") {
-            // perform calculation if the calculator has both left and right numbers
-            if (haveLeft && haveRight) {
-                displayNum = calculate(leftNum, operator, rightNum);
-                resetAfterCalculation();
-            }
-            operator = operators[i].textContent;
-        }
-        // perform calculation if operator selected is the equals sign
-        else {
-            if (haveLeft && haveRight) {
-                displayNum = calculate(leftNum, operator, rightNum);
-                resetAfterCalculation();
-            }
-        }
-
-        console.log(leftNum);
-        console.log(rightNum);
+        handleOperator(operators[i].textContent);
     });
 }
 
@@ -211,9 +225,42 @@ sign.addEventListener("click", () => {
     displayNum *= -1;
 
     // change rightNum's value if the calculator already has the left number
-    if (haveLeft) {
+    if (haveLeft && rightNum != "invalid") {
         rightNum = displayNum;
+        display.textContent = String(displayNum).substring(0, 8);
     }
-    
-    display.textContent = String(displayNum).substring(0, 8);
-})
+    // change leftNum's value if the operator has been selected but the right number hasn't
+    else if (haveLeft && rightNum == "invalid") {
+        leftNum *= -1;
+        display.textContent = String(leftNum).substring(0, 8);
+    }
+    // change the display text content only if an operator has not been selected yet
+    else {
+        display.textContent = String(displayNum).substring(0, 8);
+    }
+});
+
+// add keyboard support for calculator
+document.addEventListener("keydown", function(e) {
+    if (e.key >= "1" && e.key <= "9") {
+        buildNumber(e.key);
+    }
+    else if (e.key == "0") {
+        addZero();
+    }
+    else if (e.key == "C" || e.key == "c") {
+        display.textContent = "0";
+        resetCalculator();
+    }
+    else if (e.key == "%" || e.key == "/" || e.key == "-" || e.key == "+" || e.key == "=") {
+        handleOperator(e.key);
+    }
+    // allow user to press enter to perform calculation
+    else if (e.key == "Enter") {
+        handleOperator("=");
+    }
+    // allow user to multiply with asterisk, pass in multiplication symbol when they do
+    else if (e.key == "*") {
+        handleOperator("\u00D7")
+    }
+});
